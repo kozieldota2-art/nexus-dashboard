@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Nexus — Painel de Despacho</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #12151A;
+    --surface: #1B1F27;
+    --surface-2: #21262F;
+    --border: #2A2F3A;
+    --text: #E7EAF0;
+    --text-muted: #8B93A7;
+    --accent: #6C8CFF;
+    --ok: #4ADE9A;
+    --warn: #F0B429;
+    --err: #F0553F;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Space Grotesk', sans-serif;
+    min-height: 100vh;
+  }
+
+  .mono { font-family: 'IBM Plex Mono', monospace; }
+
+  a { color: var(--accent); }
+
+  /* ---------- shell ---------- */
+
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 28px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .wordmark {
+    font-weight: 700;
+    font-size: 1.15rem;
+    letter-spacing: 0.02em;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .wordmark .dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: var(--ok);
+    box-shadow: 0 0 0 4px rgba(74, 222, 154, 0.15);
+  }
+
+  .user-chip {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+  }
+
+  .user-chip img {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+  }
+
+  button {
+    font-family: inherit;
+    cursor: pointer;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: var(--surface-2);
+    color: var(--text);
+    padding: 8px 14px;
+    font-size: 0.85rem;
+    transition: border-color 0.15s ease, background 0.15s ease;
+  }
+
+  button:hover { border-color: var(--accent); }
+  button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  main {
+    max-width: 980px;
+    margin: 0 auto;
+    padding: 32px 24px 80px;
+  }
+
+  /* ---------- login gate ---------- */
+
+  .gate {
+    min-height: 70vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    gap: 18px;
+    padding: 40px 20px;
+  }
+
+  .gate h1 {
+    font-size: 1.6rem;
+    margin: 0;
+    font-weight: 600;
+  }
+
+  .gate p {
+    color: var(--text-muted);
+    max-width: 380px;
+    line-height: 1.5;
+    margin: 0;
+  }
+
+  .google-btn {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: #fff;
+    color: #1F1F1F;
+    border: none;
+    padding: 11px 20px;
+    border-radius: 8px;
+    font-weight: 500;
+    font-size: 0.95rem;
+  }
+
+  .google-btn:hover { background: #f2f2f2; }
+
+  .denied {
+    color: var(--err);
+    font-size: 0.85rem;
+    max-width: 360px;
+  }
+
+  /* ---------- hero stats ---------- */
+
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 32px;
+  }
+
+  .stat {
+    background: var(--surface);
+    padding: 20px 22px;
+  }
+
+  .stat .label {
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+  }
+
+  .stat .value {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 1.6rem;
+    font-weight: 600;
+  }
+
+  .stat .value.warn { color: var(--warn); }
+  .stat .value.ok { color: var(--ok); }
+
+  /* ---------- manifest / task log ---------- */
+
+  .manifest-header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: 14px;
+  }
+
+  .manifest-header h2 {
+    font-size: 1rem;
+    font-weight: 600;
+    margin: 0;
+    color: var(--text-muted);
+    text-transform: none;
+  }
+
+  .manifest {
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+
+  .row {
+    display: grid;
+    grid-template-columns: 118px 96px 1fr 90px;
+    gap: 14px;
+    align-items: center;
+    padding: 14px 18px;
+    border-left: 3px solid transparent;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.88rem;
+  }
+
+  .row:last-child { border-bottom: none; }
+
+  .row.status-pending { border-left-color: var(--warn); }
+  .row.status-done { border-left-color: var(--ok); }
+  .row.status-error { border-left-color: var(--err); }
+
+  .row .time {
+    font-family: 'IBM Plex Mono', monospace;
+    color: var(--text-muted);
+    font-size: 0.78rem;
+  }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.75rem;
+    font-family: 'IBM Plex Mono', monospace;
+  }
+
+  .badge .dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+  }
+
+  .status-pending .badge .dot { background: var(--warn); }
+  .status-done .badge .dot { background: var(--ok); }
+  .status-error .badge .dot { background: var(--err); }
+
+  .row .prompt {
+    color: var(--text);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .row .cost {
+    text-align: right;
+    font-family: 'IBM Plex Mono', monospace;
+    color: var(--text-muted);
+    font-size: 0.8rem;
+  }
+
+  .empty {
+    padding: 48px 20px;
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+  }
+
+  .setup-banner {
+    background: var(--surface);
+    border: 1px solid var(--warn);
+    border-radius: 10px;
+    padding: 16px 20px;
+    margin-bottom: 28px;
+    font-size: 0.85rem;
+    line-height: 1.6;
+  }
+
+  .setup-banner .uid {
+    display: inline-block;
+    background: var(--surface-2);
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.8rem;
+    user-select: all;
+  }
+
+  @media (max-width: 600px) {
+    .stats { grid-template-columns: 1fr; }
+    .row { grid-template-columns: 1fr; gap: 6px; }
+    .row .cost { text-align: left; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wordmark"><span class="dot"></span> NEXUS</div>
+  <div id="userArea"></div>
+</header>
+
+<main id="app">
+  <div class="gate">
+    <p>Carregando…</p>
+  </div>
+</main>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
+  import {
+    getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged
+  } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
+  import {
+    getFirestore, collection, query, orderBy, limit, onSnapshot, doc
+  } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyDE45jKPU5jIkzPR3gRQXhVwyQDuoQXoo",
+    authDomain: "erp-galpas.firebaseapp.com",
+    projectId: "erp-galpas",
+    storageBucket: "erp-galpas.firebasestorage.app",
+    messagingSenderId: "653262190463",
+    appId: "1:653262190463:web:c9f80ae241a0d4d62c4c4a",
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+  const provider = new GoogleAuthProvider();
+
+  const appEl = document.getElementById("app");
+  const userArea = document.getElementById("userArea");
+
+  let unsubTasks = null;
+  let unsubBudget = null;
+
+  onAuthStateChanged(auth, (user) => {
+    if (unsubTasks) { unsubTasks(); unsubTasks = null; }
+    if (unsubBudget) { unsubBudget(); unsubBudget = null; }
+
+    if (!user) {
+      userArea.innerHTML = "";
+      renderGate();
+      return;
+    }
+
+    renderUserChip(user);
+    renderDashboardShell(user);
+    watchTasks();
+    watchBudget();
+  });
+
+  function renderGate() {
+    appEl.innerHTML = `
+      <div class="gate">
+        <h1>Painel de despacho</h1>
+        <p>Entre com sua conta Google pra ver a fila de tarefas dos agentes.</p>
+        <button class="google-btn" id="loginBtn">
+          <svg width="18" height="18" viewBox="0 0 18 18"><path fill="#4285F4" d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.48h4.84a4.14 4.14 0 0 1-1.8 2.72v2.26h2.9c1.7-1.56 2.7-3.87 2.7-6.62z"/><path fill="#34A853" d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.9-2.26c-.8.54-1.83.86-3.06.86-2.35 0-4.34-1.59-5.05-3.72H.98v2.33A9 9 0 0 0 9 18z"/><path fill="#FBBC05" d="M3.95 10.7A5.4 5.4 0 0 1 3.67 9c0-.59.1-1.17.28-1.7V4.97H.98A9 9 0 0 0 0 9c0 1.45.35 2.83.98 4.03l2.97-2.33z"/><path fill="#EA4335" d="M9 3.58c1.32 0 2.5.46 3.44 1.35l2.58-2.58C13.46.89 11.43 0 9 0A9 9 0 0 0 .98 4.97l2.97 2.33C4.66 5.17 6.65 3.58 9 3.58z"/></svg>
+          Entrar com Google
+        </button>
+        <p class="denied" id="deniedMsg" hidden>Essa conta não tem acesso a esse painel.</p>
+      </div>
+    `;
+    document.getElementById("loginBtn").addEventListener("click", async () => {
+      const denied = document.getElementById("deniedMsg");
+      denied.hidden = true;
+      try { await signInWithPopup(auth, provider); }
+      catch (e) { console.error(e); }
+    });
+  }
+
+  function renderUserChip(user) {
+    userArea.innerHTML = `
+      <div class="user-chip">
+        <img src="${user.photoURL || ''}" alt="" />
+        <span>${user.email}</span>
+        <button id="logoutBtn">Sair</button>
+      </div>
+    `;
+    document.getElementById("logoutBtn").addEventListener("click", () => signOut(auth));
+  }
+
+  function renderDashboardShell(user) {
+    appEl.innerHTML = `
+      <div class="setup-banner">
+        <strong>Configuração pendente:</strong> pra travar o acesso só à sua conta, copie o UID abaixo
+        e cole nas Regras de Segurança do Firestore (veja instruções no README).
+        Seu UID: <span class="uid">${user.uid}</span>
+      </div>
+
+      <div class="stats">
+        <div class="stat">
+          <div class="label">Tarefas ativas</div>
+          <div class="value warn" id="statActive">—</div>
+        </div>
+        <div class="stat">
+          <div class="label">Gasto hoje</div>
+          <div class="value" id="statSpent">—</div>
+        </div>
+        <div class="stat">
+          <div class="label">Total no histórico</div>
+          <div class="value" id="statTotal">—</div>
+        </div>
+      </div>
+
+      <div class="manifest-header">
+        <h2>Fila de tarefas — mais recentes primeiro</h2>
+      </div>
+      <div class="manifest" id="manifest">
+        <div class="empty">Carregando…</div>
+      </div>
+    `;
+  }
+
+  function statusLabel(status) {
+    if (status === "pending") return "pendente";
+    if (status === "done") return "concluída";
+    if (status === "error") return "erro";
+    return status || "—";
+  }
+
+  function formatTime(iso) {
+    if (!iso) return "—";
+    const d = new Date(iso);
+    return d.toLocaleString("pt-BR", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" });
+  }
+
+  function watchTasks() {
+    const q = query(collection(db, "nexus_tasks"), orderBy("createdAt", "desc"), limit(50));
+    unsubTasks = onSnapshot(q, (snap) => {
+      const tasks = snap.docs.map((d) => d.data());
+      renderManifest(tasks);
+      renderTaskStats(tasks);
+    }, (err) => {
+      console.error(err);
+      document.getElementById("manifest").innerHTML =
+        `<div class="empty">Não foi possível carregar a fila. Confira as Regras de Segurança do Firestore.</div>`;
+    });
+  }
+
+  function watchBudget() {
+    const ref = doc(db, "nexus_meta", "budget");
+    unsubBudget = onSnapshot(ref, (snap) => {
+      const data = snap.exists() ? snap.data() : { spentUsd: 0 };
+      document.getElementById("statSpent").textContent =
+        "US$ " + (data.spentUsd || 0).toFixed(4);
+    });
+  }
+
+  function renderTaskStats(tasks) {
+    const active = tasks.filter((t) => t.status === "pending").length;
+    const total = tasks.reduce((sum, t) => sum + (typeof t.costUsd === "number" ? t.costUsd : 0), 0);
+    document.getElementById("statActive").textContent = active;
+    document.getElementById("statTotal").textContent = "US$ " + total.toFixed(4);
+  }
+
+  function renderManifest(tasks) {
+    const el = document.getElementById("manifest");
+    if (!tasks.length) {
+      el.innerHTML = `<div class="empty">Nenhuma tarefa ainda. Rode "node dispatcher.js add" no terminal pra criar a primeira.</div>`;
+      return;
+    }
+    el.innerHTML = tasks.map((t) => `
+      <div class="row status-${t.status || 'pending'}">
+        <div class="time mono">${formatTime(t.createdAt)}</div>
+        <div class="badge"><span class="dot"></span>${statusLabel(t.status)}</div>
+        <div class="prompt" title="${(t.prompt || '').replace(/"/g, '&quot;')}">${t.prompt || '—'}</div>
+        <div class="cost">${typeof t.costUsd === 'number' ? 'US$ ' + t.costUsd.toFixed(4) : '—'}</div>
+      </div>
+    `).join("");
+  }
+</script>
+
+</body>
+</html>
