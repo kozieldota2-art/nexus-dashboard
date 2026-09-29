@@ -1,0 +1,8 @@
+{
+  "firestore": [
+    {
+      "database": "nexus",
+      "rules": "firestore.nexus.rules"
+    }
+  ]
+}

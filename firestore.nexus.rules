@@ -1,0 +1,27 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/nexus/documents {
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function ownsDocument() {
+      return signedIn() && request.auth.uid == resource.data.ownerId;
+    }
+
+    function ownsNewDocument() {
+      return signedIn() && request.auth.uid == request.resource.data.ownerId;
+    }
+
+    match /users/{userId} {
+      allow read, create, update: if signedIn() && request.auth.uid == userId;
+      allow delete: if false;
+    }
+
+    match /{collectionName}/{documentId} {
+      allow create: if ownsNewDocument();
+      allow read, update, delete: if ownsDocument();
+    }
+  }
+}
