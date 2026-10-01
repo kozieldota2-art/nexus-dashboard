@@ -12,6 +12,7 @@ export const nexusStore = {
   tasks: () => nexusCollection("tasks"),
   usageLogs: () => nexusCollection("usage_logs"),
   notes: () => nexusCollection("notes"),
+  topics: () => nexusCollection("topics"),
   links: () => nexusCollection("links"),
   tags: () => nexusCollection("tags"),
   revisions: () => nexusCollection("revisions"),

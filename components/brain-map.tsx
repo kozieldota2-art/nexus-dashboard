@@ -2,6 +2,8 @@
 import {useState} from "react";
 import {BrainCircuit,ExternalLink,Link2} from "lucide-react";
 import {knowledge,researchReferences,type KnowledgeNote} from "../lib/knowledge";
+import {TopicSystem} from "./topic-system";
+import "./topic-system.css";
 
 const positions:Record<string,[number,number]>={nexus:[50,50],watch:[50,12],qbit:[80,20],codex:[89,48],cloud:[76,78],firebase:[50,88],memory:[20,76],method:[10,48],hardware:[21,20],projects:[35,35],agenda:[65,35],voice:[65,65]};
 const featured=knowledge.filter(n=>positions[n.id]);
@@ -21,6 +23,7 @@ export function BrainMap({compact=false,onOpenMemory}:{compact?:boolean;onOpenMe
       </div>
       <article className="brain-detail"><small>{note.kind.toUpperCase()} · {note.source}</small><h2>{note.title}</h2><strong>{note.summary}</strong><p>{note.detail}</p><div className="brain-related"><span><Link2 size={13}/> CONECTADO A</span>{note.links.slice(0,4).map(id=>{const linked=knowledge.find(n=>n.id===id);return linked?<button key={id} onClick={()=>setSelected(id)}>{linked.title}</button>:null})}</div>{onOpenMemory&&<button className="brain-open" onClick={onOpenMemory}>Explorar memória <ExternalLink size={14}/></button>}</article>
     </div>
+    <TopicSystem compact={compact}/>
     {!compact&&<div className="brain-research"><span>REFERÊNCIAS ESTUDADAS</span>{researchReferences.map(ref=><a key={ref.name} href={ref.url} target="_blank" rel="noreferrer" title={ref.lesson}>{ref.name}<ExternalLink size={12}/></a>)}</div>}
   </section>
 }
